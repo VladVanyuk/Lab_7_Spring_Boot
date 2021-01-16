@@ -1,0 +1,5 @@
+echo "-------------Start logs script----------------"
+docker logs -f docker-spring-boot | grep error
+docker logs -f mysql-vlad | grep error
+
+echo "-------------Finish work logs script----------------"

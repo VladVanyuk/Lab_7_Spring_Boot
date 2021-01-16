@@ -1,0 +1,37 @@
+#!/bin/bash
+
+echo "----------Start script--------------"
+echo "Remove old container"
+docker rm -vf $(docker ps -a -q)
+docker rmi -f $(docker images -a -q)
+
+echo "-----------Remove dicertory---------"
+cd /
+rm -rf docker-spring-boot
+
+if ! [ -d /path/docker-spring-boot/ ]; then
+echo "create directory: docker-spring-boot"
+mkdir /docker-spring-boot
+fi
+
+echo "--------------download GitHub repository---------"
+cd /docker-spring-boot
+git clone https://github.com/VladVanyuk/Lab_7_Spring_Boot.git
+echo "download compleate"
+
+sudo firewall-cmd --zone=public --add-port=8086/tcp --permanent
+
+echo "--------------Create containers----------------"
+cd /docker-spring-boot/Lab_7_Spring_Boot
+mkdir /docker-spring-boot/db
+docker run --name mysql-vlad -e MYSQL_ROOT_PASSWORD=vlad771200 -e MYSQL_DATABASE=iot_test_db -e MYSQL_USER=vlad -e MYSQL_PASSWORD=vlad771200 -d mysql:8
+docker build . -t docker-spring-boot
+docker run -p 8086:8086 --name docker-spring-boot --link mysql-vlad:mysql -d docker-spring-boot
+
+docker exec -i mysql-vlad mysql -uvlad -pvlad771200 iot_test_db < /docker-spring-boot/Lab_7_Spring_Boot/db/mydb.sql
+
+chmod +x logs-sript
+
+echo "-----------------Finish---------------"
+
+./logs-sript
